@@ -1,0 +1,3 @@
+avg_amount,province,mtype
+101.06,ON,debit
+131.40,ON,credit

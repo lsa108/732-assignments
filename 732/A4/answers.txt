@@ -1,0 +1,13 @@
+Q1. How much of a difference did the .cache() make in your Reddit ETL code?
+When I run my reddit_etl.py code without .cache() using reddit-3 in cluster, the time is 53.866s; when I add .cache() in my code, the time became 38.997s. Thus, the performance improved around 15s, which is around 27%.
+
+Q2. When would .cache() make code slower than without?
+when we .cache() data that are not repeatedly used, then .cache() will slow the processing time, since it will occupy lots of memory which is unnecessary. 
+
+Q3. Under what conditions will the broadcast join be faster than an actual join?
+The actual join function will shuffle the RDD data which is expensive, thus when the RDD dataset is very big but the broadcast data is relatively small, the broadcast join will be faster than an actual join.
+
+Q4. When will the broadcast join be slower?
+when the broadcast data is very big, the broadcast join will take lots of memory or even crash the memory, and thus the processing time will be very slow.
+
+

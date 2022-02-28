@@ -1,0 +1,94 @@
+Q1
+Query:
+select avg(purchases.amount) as avg_amount, customers.province as province, paymentmethods.mtype as mtype
+from purchases 
+left outer join customers on purchases.custid = customers.custid
+left outer join paymentmethods on paymentmethods.pmid = purchases.pmid
+group by customers.province, paymentmethods.mtype
+having province = 'ON';
+
+Results:
+avg_amount,province,mtype
+101.06,ON,debit
+131.40,ON,credit
+
+Thus, people from Ontario tend to put larger purchases on the credit paymentmethod.
+
+Q2
+Create view:
+CREATE VIEW vancouver_custs AS
+WITH 
+  vprefixes (vp) AS 
+    (SELECT DISTINCT pcprefix FROM greater_vancouver_prefixes)
+select custid, cast(substring(postalcode,1,3) in(select vp from vprefixes) as INT) as is_vancouver
+from customers;
+
+Query:
+select vancouver_custs.is_vancouver as From_Van,
+cast((customers.province = 'BC' and vancouver_custs.is_vancouver = 0) as INT) as From_BC_non_Van, 
+count(purchases.purchid) as Counts, avg(purchases.amount) as Average, median(purchases.amount) as Median
+from purchases  
+left outer join customers on purchases.custid = customers.custid
+left outer join vancouver_custs on vancouver_custs.custid = purchases.custid
+group by From_Van, From_BC_non_Van
+order by Median;
+
+Results:
+from_van,from_bc_non_van,counts,average,median
+1,0,10384,86.01,27.370      	# people who live in the Vancouver region
+0,1,3899,95.16,30.080           #visitors from other BC areas
+0,0,15717,112.89,33.270		#visitors from outside BC
+
+We can see that visitors from outside BC spent the most per transaction.
+
+Q3
+Query:
+WITH sushi (amenid) as (
+	select amenid from amenities
+  	where amenity = 'restaurant' and (tags.cuisine ilike '%sushi%' or tags.cuisine ilike '%udon%' or 	tags.cuisine ilike '%sashimi%')
+)
+select vancouver_custs.is_vancouver as is_vancouver,
+avg(purchases.amount) as avg
+from purchases
+left outer join vancouver_custs on vancouver_custs.custid = purchases.custid
+where purchases.amenid in(select amenid from sushi)
+group by is_vancouver
+order by is_vancouver;
+
+Results:
+is_vancouver,avg
+0,85.80
+1,77.57
+
+We can see that tourists spends more at restaurants that serve sushi.
+
+Q4
+Query:
+select cast(pdate as date) as pdate, avg(amount)
+from purchases
+where date_part(mon, pdate) = 8 and date_part(d,pdate) < 6
+group by pdate
+order by pdate;
+
+Result:
+pdate,avg
+2021-08-01,96.59
+2021-08-02,106.56
+2021-08-03,95.87
+2021-08-04,115.50
+2021-08-05,95.67
+
+The average purchase per day for the first five days of August is as above.
+
+The bytes / record ratio for Redshift on the 5-day query are 94.06KB, 4703rows (around 20 bytes per row)
+
+The bytes / record ratio for Spectrum on the 5-day query are 267396 bytes, 4703rows (around 56 bytes per row)
+
+How Redshift scans the table? Redshift only scans the used column when scanning the data
+How Spectrum scans the table? Spectrum scans all the column when scanning the data
+
+Based on these computations and the parallelism results, what properties of a dataset might make it well-suited to loading from S3 into Redshift before querying it?
+When the dataset has large amount of columns but the datasize is not very big, it would be well-suited to Redshift, because the Redshift only scan used columns and it doesn't have parallelism (fast for relatively small dataset). Also, the pricing increase with more data storage and CPU cores; thus, when the dataset is too big, it will also increase the Redshift cost.
+
+g. Conversely, what properties of a dataset might make it well-suited to retaining in S3 and querying it using Spectrum?
+When the dataset has relatively less amount of columns and large record amounts, it would be well-suited to retaining in S3 and querying it using Spectrum. Because the Spectrum has parallelism which can increase the query speed. Also, the Spectrum costs by query amount, thus it would be cheaper when dealing with big dataset.

@@ -1,0 +1,32 @@
+Q1. What happened when you inserted another row with the same primary key as an existing row?
+The value of this primary key was updated.
+
+Q2. What happened when you query a keyspace with replication factor 1 and one node down? How did it behave with replication factor 2 and a node down?
+There's an NoHostAvailable error when I query the keyspace with replication factor 1 and one node down, because with replication factor 1, the data was only stored in one node. If this node was down, the operation cannot be done.
+With replication factor 2, the data was stored in two nodes. When a node is down, Cassandra can fetch data replication from the good node, and thus the entire operation can be done.
+
+Q3. How did the consistency level affect the results with the node up/down?
+With consistency level = 1 and replication node = 1, when the node down, the operation cannot be completed;
+with consistency level = All and replication node = 1, when the node down, the operation cannot be completed;
+with consistency level = 1 and replication node = 2, when the node down, the operation can be completed;
+with consistency level = All and replication node = 2, when the node down, the operation cannot be completed;
+In summary, with replication nodes over one, when the consistency level increase, the fault tolerance will decrease, that is the operation will be more likely to fail when a node/some nodes is down.
+
+Q4. Which of the WHERE id=? values returned successfully with CONSISTENCY ALL when one of the nodes was down? Why do you think some could be returned but not others?
+id = 1,4,5,7 returned successfully with CONSISTENCY ALL when one of the nodes was down.
+Because the cluster has three nodes and the replication factor is 2. If the 2 replicated data were stored in the two good nodes and the consistency level is all, those data can still be fetched (in this case, data with id = 1,4,5,7). But if the two replicated data were stored in one up node and one down node, and when the consistency level is all, those data cannot be fetched under this consistency level (in this case, data with id = 2,3).
+
+Q5. What was the CREATE TABLE statement you used for the nasalogs table? What was the primary key you choose, and why?
+CREATE TABLE nasalogs (
+  host TEXT,
+  id UUID,
+  datetime TIMESTAMP,
+  path TEXT,
+  bytes INT,
+  PRIMARY KEY (host, id)
+);
+
+I choose (host, id) as the primary key, because in order to calculate the correlate rate I need to use the groupby function on "host", but Cassandra is expensive with the groupby function. Thus, I choose host as part of the primary key. However, the 'host' is not unique; thus, I added the UUID (column 'id') to make the (host, id) primary key unique.
+
+Q6. What was the CQL query you used (or tried) to get the total number of bytes?
+SELECT SUM (bytes) FROM nasalogs;

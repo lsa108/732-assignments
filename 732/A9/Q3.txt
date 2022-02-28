@@ -1,0 +1,3 @@
+is_vancouver,avg
+0,78.56
+1,70.24

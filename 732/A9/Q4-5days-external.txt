@@ -1,0 +1,2 @@
+external_table_name,s3_scanned_bytes,s3_scanned_rows,avg_request_parallelism,max_request_parallelism
+S3 Subquery dev_s3ext_purchases,267396,4703,1.5,5
