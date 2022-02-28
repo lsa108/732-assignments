@@ -1,0 +1,19 @@
+Q1:In the WikipediaPopular class, it would be much more interesting to find the page that is most popular, not just the view count (as we did with Spark). What would be necessary to modify your class to do this? (You don't have to actually implement it.)
+It is necessary to modify the Mapper output as (key, (title, count)) instead of (key,count), and modify the reduce input and output as (key, (title, count)) as well.
+
+
+Q2: An RDD has many methods: it can do many more useful tricks than were at hand with MapReduce. Write a sentence or two to explain the difference between .map and .flatMap. Which is more like the MapReduce concept of mapping?
+Map applies to each element of RDD and returns the result as new RDD. In the Map, we can define our own custom logic. The same logic will be applied to all the elements of RDD. Map function takes one element as input, process it according to custom code, and returns one element at a time. Map transforms an RDD of length N into another RDD of length N. The input and output RDDs will typically have the same number of records. FlatMap is similar to Map, but flatMap transforms an RDD of length N into another RDD of length M.
+
+FlatMap is more like the MapReduce concept of mapping. Because the MapReduce concept of mapping takes one dataset as input but returns multiple datasets as output; that is more like transforming a RDD of length M to another RDD of length N. 
+
+Q3: Do the same for .reduce and .reduceByKey. Which is more like the MapReduce concept of reducing?
+Reduce is a function that operates on an RDD of objects, a member of RDD[T] class; while reduceByKey() is a function that operates on an RDD of key-value pairs, a member of the PairRDDFunctions[K, V] class.
+
+Reduce function is reducing the entire dataset to one value, thus it must pull the entire dataset down into
+a single location; however, reduceByKey is reducing by keys, that is one value for each key. Thus, the output of reduceByKey is an RDD of key-value pairs.
+
+reduceByKey is more like the MapReduce concept of reducing. Because the MapReduce concept of reducing is more like operating on key-value pairs and output key-value pairs as well.
+
+Q4: When finding popular Wikipedia pages, the maximum number of page views is certainly unique, but the most popular page might be a tie. What would your improved Python implementation do if there were two pages with the same highest number of page views in an hour? What would be necessary to make your code find all of the pages views the maximum number of times? (Again, you don't have to actually implement this.)
+Without modifying, the reduceByKey(max) function can only output one key-pair value as (key, (highest count, page title)) with the highest number of page views in each hour. If we want to find all of the pages views the maximum number of times, it is necessary to modify the reduceByKey(max) function to let it output the page titles as list, the key-pair value as (key, list of (highest count, pages_title)).

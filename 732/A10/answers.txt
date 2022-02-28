@@ -1,0 +1,103 @@
+Q1. What is your best guess for the slope and intercept of the streaming points being produced?
+My best guess for the slope and intercept would be 6.1 and -9.6, which are the results when I test with xy-100.
+The beta and alpha kept waving aroung 6.1 and -9.6.
+
+Q2. Is your streaming program's estimate of the slope and intercept getting better as the program runs? (That is: is the program aggregating all of the data from the start of time, or only those that have arrived since the last output?)
+Yes, because when I test with xy-100, the alpha first stared from around -7.9 and then to around -9.8 and finally came near -9.6 and kept steady. The program aggregeted all of the data from the start time because I set the outputmode as 'complete'.
+
+Q3. In the colour classification question, what were your validation scores for the RGB and LAB pipelines?
+My validation scores for the RGB and LAB pipelines are:
+Validation score for RGB model: 0.565567
+Validation score for LAB model: 0.677138453914091
+
+Q4. When predicting the tmax values, did you over-fit the training data (and for which training/validation sets)?
+I tried three kinds of regressors: DecissiontreeRegressor, GBTRegressor, and GeneralizedLinearRegression
+Besides, when I trained these models, I found the results were not always the same probably due to the random train/validation/testing dataset generation. I only list one of my results under each case as below:
+
+1) For the DecisiontreeRegressor on dataset tmax-1 without 'yesterday_tmax':
+the training errors are as below:
+r-square: 0.717606
+root mean square error: 6.29048
+the test errors are as below:
+r2 = 0.36795979077584895
+rmse = 10.31203943926565
+
+I used dataset tmax-2 to test again:
+the training errors are as below:
+r-square: 0.692859
+root mean square error: 7.17647
+the test errors are as below:
+r2 = 0.6830050715933657
+rmse = 7.302950689946204
+
+As we can see in dataset tmax-1, the training errors seem ok but the test errors are big, thus it should be over-fit for this decision tree model; but in dataset tmax-2, both the training errors and test errors seem not very big, but the r-square need to be improved; thus, this model still need to be optimized.
+
+2) for the GBTRegressor on dataset tmax-1 without 'yesterday_tmax':
+the training errors are as below:
+r-square: 0.894081
+root mean square error: 4.01805
+the test errors are as below:
+r2 = 0.5192729183391585
+rmse = 8.993350210244518
+
+I used dataset tmax-2 to test again:
+the training errors are as below:
+r-square: 0.787643
+root mean square error: 5.9546
+the test errors are as below:
+r2 = 0.7712090338726854
+rmse = 6.204283686037259
+
+We can see in dataset tmax-1, the training errors seem good but the test errors are relatively big, thus this GBT model is also over-fit; in dataset tmax-2, both the training errors and test errors are not very big, but the r-square need to be improved; thus, this model still need to be optimized.
+
+3) for the GeneralizedLinearRegression on dataset tmax-1 without 'yesterday_tmax':
+the training errors are as below:
+r-square: 0.262827
+root mean square error: 11.1293
+the test errors are as below:
+r2 = 0.015455146643826967
+rmse = 12.870338353519191
+
+Both the training errors and test errors are big in this model and the r-squares are small, thus the GeneralizedLinearRegression model seems not work well here.
+
+Q5. What were your testing scores for your model with and without the “yesterday's temperature” feature?
+For the GBTRegressor model using dataset tmax-1:
+without “yesterday's temperature” feature, the testing scores are as below:
+r2 = 0.5192729183391585
+rmse = 8.993350210244518
+(4,[0,1,2,3],[0.3117768586350135,0.08706552940406796,0.07994319542598621,0.5212144165349323])
+
+whth “yesterday's temperature” feature, the testing scores are as below:
+r2 = 0.861275548403291
+rmse = 4.815361176846558
+(5,[0,1,2,3,4],[0.04322347906175217,0.024895918563862765,0.026863772589182166,0.0790786095059871,0.8259382202792158])
+
+For the GBTRegressor model using dataset tmax-2:
+without “yesterday's temperature” feature, the testing scores are as below:
+r2 = 0.6830050715933657
+rmse = 7.302950689946204
+(4,[0,1,2,3],[0.40081182869014065,0.014443793458485704,0.0036627626366018628,0.581081615214772])
+
+whth “yesterday's temperature” feature, the testing scores are as below:
+r2 = 0.9089826026848107
+rmse = 3.9004486518416535
+(5,[0,1,2,3,4],[0.02858318731054177,0.012508721606801837,0.008473061442190781,0.037653550578236494,0.9127814790622291])
+
+we can see that the testing scores became better when we add the “yesterday's temperature” feature.
+
+Q6. If you're using a tree-based model, you'll find a .featureImportances property that describes the relative importance of each feature (code commented out in weather_test.py; if not, skip this question). Have a look with and without the “yesterday's temperature” feature: do the results make sense and suggest that your model is making decisions reasonably? With “yesterday's temperature”, is it just predicting “same as yesterday”?
+For the GBTRegression model using tmax-1:
+The test scores are as below without “yesterday's temperature”:
+r2 = 0.5192729183391585
+rmse = 8.993350210244518
+features:'latitude','longitude','elevation', 'day_of_year'
+(4,[0,1,2,3],[0.3117768586350135,0.08706552940406796,0.07994319542598621,0.5212144165349323])
+
+The testing scores are as below with “yesterday's temperature”:
+r2 = 0.861275548403291
+rmse = 4.815361176846558
+features:'latitude','longitude','elevation', 'day_of_year','yesterday_tmax'
+(5,[0,1,2,3,4],[0.04322347906175217,0.024895918563862765,0.026863772589182166,0.0790786095059871,0.8259382202792158])
+
+I think the results make sense, because acordding to my common sense, the temperature should be relatively consistent in the short time (like from yesterday to today) and the yesterday's temperature should take a more important role in this model. Also, the model is improved when we add the yesterday's temperature feature.
+I don't think it's just predicting "same" as yesterday with the yesterday's temperature feature, even though this is the most important feature, the other features also contributed some to the predictions. but the predictions seems basicly determined by yesterday's temperature.

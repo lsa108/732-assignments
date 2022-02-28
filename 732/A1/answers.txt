@@ -1,0 +1,11 @@
+Q1. Are there any parts of the original WordCount that still confuse you? If so, what?
+I got many questions with the code at first, but they have been solved with the help of Google, your instructions, and TAs' help.
+
+Q2. How did the output change when you submitted with -D mapreduce.job.reduces=3? Why would this be necessary if your job produced large output sets?
+The output is splited into 3 files since the data was processed in 3 reduces and each reduce will generate a file. This necessary for large dataset because the increasing of reducers should increase the processing speed literally. But this should have a precondition that the dataset is large enough and the couputing resource is abundant. In this case, I find the running time is even slower when I use 3 reduces. I think it is probably because the dataset is not big enough for the parallel computing advantage. The code was processed three times which also takes time. Besides, I think the increasing reduces may also have an advantage of improving error tolerance, because if one of the reduces failed, the other reduces can still keep running. This is also necessary for big dataset especially when the data is not very clean or not well orgnized.
+
+Q3. How was the -D mapreduce.job.reduces=0 output different?
+The output is map output instead of reduce output when the reduces=0. The wordcount, for example, its output is like (1,word1) (1,word2) (1,word3), etc. This can be used to debug or check the mapper.
+
+Q4. Was there any noticeable difference in the running time of your RedditAverage with and without the combiner optimization?
+In this case, I did not find a big difference when running the code (maybe due to small dataset). But theoretically, the time should be shorter when running with combiner especially in big dataset. This is probably because with combiner, the data was optimized before shuffle and thus decreasing the data load of both shuffle and reduces. 
