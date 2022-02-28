@@ -1,0 +1,19 @@
+Q1. What was wrong with the original wordcount-5 data set that made repartitioning worth it? Why did the program run faster after?
+Bacause the files' size in original wordcount-5 data set are not even, some are very big while some are small. Thus, the big files will slow the entire processing time a lot. When we do repartition, the entire dataset is repartitioned in a more optimized way, and thus the dadaset size in each partition will be much more even and the program runs faster.
+
+
+Q2. The same fix does not make this code run faster on the wordcount-3 data set. (It may be slightly slower?) Why? [For once, the answer is not “the data set is too small”.]
+In the wordcount-3 data set, there are many relatively small files but each file has similar size; thus, it is easy for the excutor to process each partition/file and not much resource waste; if we do repartition, it is likely that the time cost of repartion will exceed the time saved of running originally. 
+
+
+Q3. How could you modify the wordcount-5 input so that the word count code can process it and get the same results as fast as possible? (It's possible to get about another minute off the running time.)
+We can modify the wordcount-5 dataset to let the files sizes distributed more equally, which is kind of like the repartition. In this way, the code can run without repartition but get the same results as repartition.
+
+
+Q4. When experimenting with the number of partitions while estimating Euler's constant, you likely didn't see much difference for a range of values, and chose the final value in your code somewhere in that range. What range of partitions numbers was “good” (on the desktop/laptop where you were testing)?
+I experimented with [2, 4, 8, 16, 32, 64, 128, 256, 512] as the number of partitions, my best performance is about 27s with 32 partitions; when the partition number is 2 or 4, the performance drops to around 48s, and the 512 partitions performed around 39s, and 256 performed around 35s. The left experimenting numbers get performance around 30s-32s. Thus, my "good" range of partitions numbers should be around from 16 to 128.
+
+
+Q5. How much overhead does it seem like Spark adds to a job? How much speedup did PyPy get over the usual Python implementation?
+The single-threaded job only takes around 3s for sample size 1000000; thus, the Spark seems add around 20s overhead.
+When using Pypy, the average running time is below 10s. Thus, PyPy get over the usual Python implementation like three or double times.
